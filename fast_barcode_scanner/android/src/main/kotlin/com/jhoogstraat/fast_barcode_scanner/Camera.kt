@@ -3,6 +3,7 @@ package com.jhoogstraat.fast_barcode_scanner
 import android.Manifest
 import android.app.Activity
 import android.content.pm.PackageManager
+import android.hardware.camera2.params.MeteringRectangle
 import android.util.Log
 import android.view.Surface
 import androidx.camera.core.*
@@ -23,6 +24,7 @@ import io.flutter.view.TextureRegistry
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import kotlin.math.roundToInt
 
 class Camera(
     val activity: Activity,
@@ -173,6 +175,7 @@ class Camera(
 
         imageAnalysis = ImageAnalysis.Builder()
             .setTargetRotation(Surface.ROTATION_0)
+            .setTargetResolution(scannerConfiguration.resolution.portrait())
             .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
             .build()
             .also { it.setAnalyzer(cameraExecutor, barcodeScanner) }
@@ -194,6 +197,7 @@ class Camera(
             preview,
             imageAnalysis
         )
+
 
         // Setup Surface
         cameraSurfaceProvider = Preview.SurfaceProvider {
@@ -245,6 +249,40 @@ class Camera(
             throw ScannerException.NotInitialized()
 
         imageAnalysis.clearAnalyzer()
+    }
+
+    fun setZoomLevel() {
+        if (!isInitialized)
+            throw ScannerException.NotInitialized()
+        else if (!isRunning)
+            throw ScannerException.NotRunning()
+        else if (!cameraProvider.isBound(imageAnalysis))
+            throw ScannerException.NotInitialized()
+
+        camera.cameraControl.setZoomRatio(2.0F)
+
+    }
+
+    fun setFocusPoint(x: Float,  y: Float) {
+        val factory: MeteringPointFactory = SurfaceOrientedMeteringPointFactory(
+                scannerConfiguration.resolution.portrait().width.toFloat(),
+                scannerConfiguration.resolution.portrait().height.toFloat()
+        )
+
+        // Interpolate the target coordinate.
+        val targetX = (x * scannerConfiguration.resolution.portrait().width)
+        val targetY = (y * scannerConfiguration.resolution.portrait().height)
+
+        val width = scannerConfiguration.resolution.portrait().width;
+        val height = scannerConfiguration.resolution.portrait().height
+        Log.d(TAG, "==== set focus: x: ${targetX},  y: ${targetY},  width: ${width},  height${height}")
+
+        val autoFocusPoint = factory.createPoint(targetX, targetY)
+        val focus = FocusMeteringAction.Builder(autoFocusPoint, FocusMeteringAction.FLAG_AF).apply {
+            //focus only when the user tap the preview
+            disableAutoCancel()
+        }.build()
+        camera.cameraControl.startFocusAndMetering(focus);
     }
 
     fun toggleTorch(): ListenableFuture<Void> {

@@ -1,8 +1,9 @@
 import 'package:fast_barcode_scanner/fast_barcode_scanner.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import '../scan_history.dart';
+
 import '../configure_screen/configure_screen.dart';
+import '../scan_history.dart';
 import '../utils.dart';
 import 'scans_counter.dart';
 
@@ -21,6 +22,15 @@ class _ScanningScreenState extends State<ScanningScreen> {
   final _scannerRunning = ValueNotifier(true);
 
   final cam = CameraController();
+
+  void onViewFinderTap(TapDownDetails details, BoxConstraints constraints) {
+    final offset = Offset(
+      details.localPosition.dx / constraints.maxWidth,
+      details.localPosition.dy / constraints.maxHeight,
+    );
+
+    cam.setFocusPoint(offset.dx, offset.dy);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,9 +83,17 @@ class _ScanningScreenState extends State<ScanningScreen> {
         mode: DetectionMode.pauseVideo,
         position: CameraPosition.back,
         onScan: (code) => history.add(code),
-        children: const [
-          MaterialPreviewOverlay(),
-          // BlurPreviewOverlay()
+        children: [
+          const MaterialPreviewOverlay(),
+          // BlurPreviewOverlay(),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              return GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTapDown: (details) => onViewFinderTap(details, constraints),
+              );
+            },
+          ),
         ],
         dispose: widget.dispose,
       ),
@@ -120,16 +138,17 @@ class _ScanningScreenState extends State<ScanningScreen> {
                           builder: (context, isRunning, _) {
                             return ElevatedButton(
                               onPressed: () {
-                                final future = isRunning
-                                    ? cam.pauseScanner()
-                                    : cam.resumeScanner();
-
-                                future
-                                    .then((_) =>
-                                        _scannerRunning.value = !isRunning)
-                                    .catchError((error, stackTrace) {
-                                  presentErrorAlert(context, error, stackTrace);
-                                });
+                                cam.setZoomLevel();
+                                // final future = isRunning
+                                //     ? cam.pauseScanner()
+                                //     : cam.resumeScanner();
+                                //
+                                // future
+                                //     .then((_) =>
+                                //         _scannerRunning.value = !isRunning)
+                                //     .catchError((error, stackTrace) {
+                                //   presentErrorAlert(context, error, stackTrace);
+                                // });
                               },
                               child: Text(isRunning
                                   ? 'Pause Scanner'

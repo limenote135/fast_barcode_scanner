@@ -56,6 +56,16 @@ class MethodChannelFastBarcodeScanner extends FastBarcodeScannerPlatform {
   Future<void> stopDetector() => _channel.invokeMethod('stopDetector');
 
   @override
+  Future<void> setZoomLevel() => _channel.invokeMethod('setZoomLevel');
+
+  @override
+  Future<void> setFocusPoint(double x, double y) =>
+      _channel.invokeMethod('setFocusPoint', {
+        "x": x,
+        "y": y,
+      });
+
+  @override
   Future<void> dispose() async {
     await _barcodeEventStreamSubscription?.cancel();
     _barcodeEventStreamSubscription = null;
