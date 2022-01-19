@@ -1,5 +1,6 @@
 import AVFoundation
 
+@available(iOS 11.0, *)
 class Camera: NSObject {
 
     // MARK: Session Management
@@ -14,6 +15,10 @@ class Camera: NSObject {
     private(set) var previewConfiguration: PreviewConfiguration!
     private var torchState = false
     private var isSessionRunning = false
+
+    static private var MIN_ZOOM_LEVEL: Float = 1.0
+    private var minZoomLevel = MIN_ZOOM_LEVEL
+    private var maxZoomLevel = MIN_ZOOM_LEVEL
 
     init(configuration: ScannerConfiguration, scanner: BarcodeScanner) throws {
         self.scanner = scanner
@@ -126,6 +131,9 @@ class Camera: NSObject {
                              height: previewSize.height,
                              targetRotation: 0,
                              textureId: 0)
+
+        maxZoomLevel = Float(self.captureDevice.maxAvailableVideoZoomFactor)
+        minZoomLevel = Float(self.captureDevice.minAvailableVideoZoomFactor)
     }
 
     func start() throws {
@@ -161,6 +169,27 @@ class Camera: NSObject {
 
     func stopDetector() {
         scanner.stop()
+    }
+
+    func setZoomLevel(scale: Double) throws {
+        try captureDevice.lockForConfiguration()
+        captureDevice.videoZoomFactor = scale
+        captureDevice.unlockForConfiguration()
+    }
+
+    func getMinZoomLevel() -> Float {
+        return minZoomLevel
+    }
+
+    func getMaxZoomLevel() -> Float {
+        return maxZoomLevel
+    }
+
+    func setFocusPoint(x: Double, y: Double) throws {
+        try captureDevice.lockForConfiguration()
+        captureDevice.focusPointOfInterest = CGPoint(x: x, y: y)
+        captureDevice.focusMode = .autoFocus
+        captureDevice.unlockForConfiguration()
     }
 
     // MARK: KVO and Notifications

@@ -47,6 +47,17 @@ public class FastBarcodeScannerPlugin: NSObject, FlutterPlugin, FlutterStreamHan
             case "startDetector": try startDetector()
             case "stopDetector": try stopDetector()
             case "torch": response = try toggleTorch()
+            case "getMinZoomLevel": response = try getMinZoomLevel()
+            case "getMaxZoomLevel": response = try getMaxZoomLevel()
+            case "setZoomLevel":
+                let args = call.arguments as? [String: Any]
+                let scale = args!["scale"] as! Double
+                try setZoomLevel(scale: scale)
+            case "setFocusPoint":
+                let args = call.arguments as? [String: Any]
+                let x = args!["x"] as! Double
+                let y = args!["y"] as! Double
+                try setFocusPoint(x: x, y: y)
             case "config": response = try updateConfiguration(call: call).asDict
             case "scan": try analyzeImage(args: call.arguments, on: result); return
             case "dispose": dispose()
@@ -148,6 +159,26 @@ public class FastBarcodeScannerPlugin: NSObject, FlutterPlugin, FlutterStreamHan
             throw ScannerError.notInitialized
         }
         return try camera.toggleTorch()
+    }
+
+    func setZoomLevel(scale: Double) throws {
+        guard let camera = camera else { throw ScannerError.notInitialized }
+        try camera.setZoomLevel(scale: scale)
+    }
+
+    func getMinZoomLevel() throws -> Float {
+        guard let camera = camera else { throw ScannerError.notInitialized }
+        return camera.getMinZoomLevel()
+    }
+
+    func getMaxZoomLevel() throws -> Float {
+        guard let camera = camera else { throw ScannerError.notInitialized }
+        return camera.getMaxZoomLevel()
+    }
+
+    func setFocusPoint(x: Double, y: Double) throws {
+        guard let camera = camera else { throw ScannerError.notInitialized }
+        try camera.setFocusPoint(x: x, y: y)
     }
 
     func updateConfiguration(call: FlutterMethodCall) throws -> PreviewConfiguration {

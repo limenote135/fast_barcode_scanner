@@ -90,6 +90,14 @@ abstract class CameraController {
   ///
   Future<void> pauseScanner();
 
+  Future<void> setZoomLevel(double scale);
+
+  Future<void> setFocusPoint(double x, double y);
+
+  Future<double> getMinZoomLevel();
+
+  Future<double> getMaxZoomLevel();
+
   /// Toggles the torch, if available.
   ///
   ///
@@ -265,6 +273,50 @@ class _CameraController implements CameraController {
   Future<void> resumeScanner() async {
     try {
       await _platform.startDetector();
+    } catch (error) {
+      state._error = error;
+      events.value = ScannerEvent.error;
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> setZoomLevel(double scale) async {
+    try {
+      await _platform.setZoomLevel(scale);
+    } catch (error) {
+      state._error = error;
+      events.value = ScannerEvent.error;
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> setFocusPoint(double x, double y) async {
+    try {
+      await _platform.setFocusPoint(x, y);
+    } catch (error) {
+      state._error = error;
+      events.value = ScannerEvent.error;
+      rethrow;
+    }
+  }
+
+  @override
+  Future<double> getMinZoomLevel() async {
+    try {
+      return await _platform.getMinZoomLevel();
+    } catch (error) {
+      state._error = error;
+      events.value = ScannerEvent.error;
+      rethrow;
+    }
+  }
+
+  @override
+  Future<double> getMaxZoomLevel() async {
+    try {
+      return await _platform.getMaxZoomLevel();
     } catch (error) {
       state._error = error;
       events.value = ScannerEvent.error;

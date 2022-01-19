@@ -127,6 +127,16 @@ class FastBarcodeScannerPlugin : FlutterPlugin, MethodCallHandler, StreamHandler
                         "stop" -> camera.stopCamera()
                         "startDetector" -> camera.startDetector()
                         "stopDetector" -> camera.stopDetector()
+                        "getMinZoomLevel" -> result.success(camera.getMinZoomLevel())
+                        "getMaxZoomLevel" -> result.success(camera.getMaxZoomLevel())
+                        "setZoomLevel" -> {
+                            val args = call.arguments as HashMap<String, Float>
+                            camera.setZoomLevel(args["scale"]!!)
+                        }
+                        "setFocusPoint" -> {
+                            val args = call.arguments as HashMap<String, Float>
+                            camera.setFocusPoint(args["x"]!!, args["y"]!!)
+                        }
                         "config" -> response =
                             camera.changeConfiguration(call.arguments as HashMap<String, Any>)
                                 .toMap()

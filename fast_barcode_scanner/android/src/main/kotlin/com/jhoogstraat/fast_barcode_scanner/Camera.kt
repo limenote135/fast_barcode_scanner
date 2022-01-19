@@ -3,6 +3,7 @@ package com.jhoogstraat.fast_barcode_scanner
 import android.Manifest
 import android.app.Activity
 import android.content.pm.PackageManager
+import android.hardware.camera2.params.MeteringRectangle
 import android.util.Log
 import android.view.Surface
 import androidx.camera.core.*
@@ -23,6 +24,9 @@ import io.flutter.view.TextureRegistry
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import kotlin.math.roundToInt
+
+const val MIN_ZOOM_LEVEL = 1.0f
 
 class Camera(
     val activity: Activity,
@@ -30,6 +34,9 @@ class Camera(
     args: HashMap<String, Any>,
     private val listener: (List<Barcode>) -> Unit
 ) : RequestPermissionsResultListener {
+
+    private var minZoomLevel = MIN_ZOOM_LEVEL
+    private var maxZoomLevel = MIN_ZOOM_LEVEL
 
     /* Scanner configuration */
     private var scannerConfiguration: ScannerConfiguration
@@ -150,6 +157,17 @@ class Camera(
             isInitialized = true
             bindCameraUseCases()
             loadingCompleter.setResult(getPreviewConfiguration())
+
+            val max = camera.cameraInfo.zoomState.value?.maxZoomRatio
+            val min = camera.cameraInfo.zoomState.value?.minZoomRatio
+
+            if (max != null) {
+                maxZoomLevel = max
+            }
+            if (min != null) {
+                minZoomLevel = min
+            }
+
         }, ContextCompat.getMainExecutor(activity))
 
         return loadingCompleter.task
@@ -195,6 +213,7 @@ class Camera(
             preview,
             imageAnalysis
         )
+
 
         // Setup Surface
         cameraSurfaceProvider = Preview.SurfaceProvider {
@@ -246,6 +265,46 @@ class Camera(
             throw ScannerException.NotInitialized()
 
         imageAnalysis.clearAnalyzer()
+    }
+
+    fun setZoomLevel(scale: Float) {
+        if (!isInitialized)
+            throw ScannerException.NotInitialized()
+        else if (!isRunning)
+            throw ScannerException.NotRunning()
+        else if (!cameraProvider.isBound(imageAnalysis))
+            throw ScannerException.NotInitialized()
+        camera.cameraControl.setZoomRatio(scale)
+    }
+
+    fun getMinZoomLevel(): Float {
+        return minZoomLevel
+    }
+
+    fun getMaxZoomLevel(): Float {
+        return maxZoomLevel
+    }
+
+    fun setFocusPoint(x: Float,  y: Float) {
+        val factory: MeteringPointFactory = SurfaceOrientedMeteringPointFactory(
+                scannerConfiguration.resolution.portrait().width.toFloat(),
+                scannerConfiguration.resolution.portrait().height.toFloat()
+        )
+
+        // Interpolate the target coordinate.
+        val targetX = (x * scannerConfiguration.resolution.portrait().width)
+        val targetY = (y * scannerConfiguration.resolution.portrait().height)
+
+        val width = scannerConfiguration.resolution.portrait().width;
+        val height = scannerConfiguration.resolution.portrait().height
+        Log.d(TAG, "==== set focus: x: ${targetX},  y: ${targetY},  width: ${width},  height${height}")
+
+        val autoFocusPoint = factory.createPoint(targetX, targetY)
+        val focus = FocusMeteringAction.Builder(autoFocusPoint, FocusMeteringAction.FLAG_AF).apply {
+            //focus only when the user tap the preview
+            disableAutoCancel()
+        }.build()
+        camera.cameraControl.startFocusAndMetering(focus);
     }
 
     fun toggleTorch(): ListenableFuture<Void> {

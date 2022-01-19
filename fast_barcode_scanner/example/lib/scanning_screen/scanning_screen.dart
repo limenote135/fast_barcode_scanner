@@ -49,6 +49,15 @@ class _ScanningScreenState extends State<ScanningScreen> {
 
   final cam = CameraController();
 
+  void onViewFinderTap(TapDownDetails details, BoxConstraints constraints) {
+    final offset = Offset(
+      details.localPosition.dx / constraints.maxWidth,
+      details.localPosition.dy / constraints.maxHeight,
+    );
+
+    cam.setFocusPoint(offset.dx, offset.dy);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
