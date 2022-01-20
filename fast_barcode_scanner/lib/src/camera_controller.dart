@@ -78,7 +78,7 @@ abstract class CameraController {
   ///
   Future<void> pauseScanner();
 
-  Future<void> setZoomLevel();
+  Future<void> setZoomLevel(double scale);
 
   Future<void> setFocusPoint(double x, double y);
 
@@ -223,9 +223,9 @@ class _CameraController implements CameraController {
   }
 
   @override
-  Future<void> setZoomLevel() async {
+  Future<void> setZoomLevel(double scale) async {
     try {
-      await _platform.setZoomLevel();
+      await _platform.setZoomLevel(scale);
     } catch (error) {
       state._error = error;
       events.value = ScannerEvent.error;

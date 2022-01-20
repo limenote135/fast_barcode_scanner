@@ -82,7 +82,7 @@ class Camera(
                 val unsupportedTypes = types.filter { !barcodeFormatMap.containsKey(it) }
                 Log.d(TAG, "WARNING: Unsupported barcode types selected: $unsupportedTypes")
             }
-            
+
         } catch (e: Exception) {
             throw ScannerException.InvalidArguments(args)
         }
@@ -251,7 +251,7 @@ class Camera(
         imageAnalysis.clearAnalyzer()
     }
 
-    fun setZoomLevel() {
+    fun setZoomLevel(scale: Float) {
         if (!isInitialized)
             throw ScannerException.NotInitialized()
         else if (!isRunning)
@@ -259,7 +259,7 @@ class Camera(
         else if (!cameraProvider.isBound(imageAnalysis))
             throw ScannerException.NotInitialized()
 
-        camera.cameraControl.setZoomRatio(2.0F)
+        camera.cameraControl.setZoomRatio(scale)
 
     }
 

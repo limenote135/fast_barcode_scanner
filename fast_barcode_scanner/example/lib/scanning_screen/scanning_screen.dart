@@ -138,7 +138,7 @@ class _ScanningScreenState extends State<ScanningScreen> {
                           builder: (context, isRunning, _) {
                             return ElevatedButton(
                               onPressed: () {
-                                cam.setZoomLevel();
+                                cam.setZoomLevel(1.5);
                                 // final future = isRunning
                                 //     ? cam.pauseScanner()
                                 //     : cam.resumeScanner();
