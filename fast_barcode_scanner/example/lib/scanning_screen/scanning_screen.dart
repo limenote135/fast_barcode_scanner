@@ -158,14 +158,22 @@ class _ScanningScreenState extends State<ScanningScreen> {
                       ValueListenableBuilder<bool>(
                         valueListenable: _torchIconState,
                         builder: (context, isTorchActive, _) => ElevatedButton(
-                          onPressed: () {
-                            cam
-                                .toggleTorch()
-                                .then((torchState) =>
-                                    _torchIconState.value = torchState)
-                                .catchError((error, stackTrace) {
-                              presentErrorAlert(context, error, stackTrace);
-                            });
+                          onPressed: () async {
+                            final minF = cam.getMinZoomLevel();
+                            final maxF = cam.getMaxZoomLevel();
+
+                            final min = await minF;
+                            final max = await maxF;
+
+                            print("$min - $max");
+
+                            // cam
+                            //     .toggleTorch()
+                            //     .then((torchState) =>
+                            //         _torchIconState.value = torchState)
+                            //     .catchError((error, stackTrace) {
+                            //   presentErrorAlert(context, error, stackTrace);
+                            // });
                           },
                           child: Text('Torch: ${isTorchActive ? 'on' : 'off'}'),
                         ),

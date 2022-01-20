@@ -26,12 +26,17 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import kotlin.math.roundToInt
 
+const val MIN_ZOOM_LEVEL = 1.0f
+
 class Camera(
     val activity: Activity,
     val flutterTextureEntry: TextureRegistry.SurfaceTextureEntry,
     args: HashMap<String, Any>,
     private val listener: (List<Barcode>) -> Unit
 ) : RequestPermissionsResultListener {
+
+    private var minZoomLevel = MIN_ZOOM_LEVEL
+    private var maxZoomLevel = MIN_ZOOM_LEVEL
 
     /* Scanner configuration */
     private var scannerConfiguration: ScannerConfiguration
@@ -152,6 +157,17 @@ class Camera(
             isInitialized = true
             bindCameraUseCases()
             loadingCompleter.setResult(getPreviewConfiguration())
+
+            val max = camera.cameraInfo.zoomState.value?.maxZoomRatio
+            val min = camera.cameraInfo.zoomState.value?.minZoomRatio
+
+            if (max != null) {
+                maxZoomLevel = max
+            }
+            if (min != null) {
+                minZoomLevel = min
+            }
+
         }, ContextCompat.getMainExecutor(activity))
 
         return loadingCompleter.task
@@ -258,9 +274,15 @@ class Camera(
             throw ScannerException.NotRunning()
         else if (!cameraProvider.isBound(imageAnalysis))
             throw ScannerException.NotInitialized()
-
         camera.cameraControl.setZoomRatio(scale)
+    }
 
+    fun getMinZoomLevel(): Float {
+        return minZoomLevel
+    }
+
+    fun getMaxZoomLevel(): Float {
+        return maxZoomLevel
     }
 
     fun setFocusPoint(x: Float,  y: Float) {

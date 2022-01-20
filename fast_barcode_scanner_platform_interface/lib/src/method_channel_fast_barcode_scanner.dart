@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ffi';
 
 import 'package:fast_barcode_scanner_platform_interface/src/types/image_source.dart';
 import 'package:flutter/services.dart';
@@ -56,9 +57,14 @@ class MethodChannelFastBarcodeScanner extends FastBarcodeScannerPlatform {
   Future<void> stopDetector() => _channel.invokeMethod('stopDetector');
 
   @override
-  Future<void> setZoomLevel(double scale) => _channel.invokeMethod('setZoomLevel',{
-    "scale": scale,
-  });
+  Future<void> setZoomLevel(double scale) =>
+      _channel.invokeMethod('setZoomLevel', {
+        "scale": scale,
+      });
+
+  Future<double> getMinZoomLevel() => _channel.invokeMethod('getMinZoomLevel').then<double>((value) => value);
+
+  Future<double> getMaxZoomLevel() => _channel.invokeMethod('getMaxZoomLevel').then<double>((value) => value);
 
   @override
   Future<void> setFocusPoint(double x, double y) =>
