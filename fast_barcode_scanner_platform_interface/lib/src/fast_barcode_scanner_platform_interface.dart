@@ -64,7 +64,7 @@ abstract class FastBarcodeScannerPlatform extends PlatformInterface {
   }
 
   // Stops the detector. Keeps the preview running.
-  Future<void> setZoomLevel() {
+  Future<void> setZoomLevel(double scale) {
     throw UnimplementedError('stopDetector() has not been implemented');
   }
 

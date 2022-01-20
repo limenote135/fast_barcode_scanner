@@ -48,8 +48,8 @@ public class FastBarcodeScannerPlugin: NSObject, FlutterPlugin, FlutterStreamHan
             case "torch": response = try toggleTorch()
             case "setZoomLevel":
                 let args = call.arguments as? [String: Any]
-                let factor = args!["ratio"] as! Double
-                try setZoomLevel(factor: factor)
+                let scale = args!["scale"] as! Double
+                try setZoomLevel(scale: scale)
             case "setFocusPoint":
                 let args = call.arguments as? [String: Any]
                 let x = args!["x"] as! Double
@@ -123,9 +123,9 @@ public class FastBarcodeScannerPlugin: NSObject, FlutterPlugin, FlutterStreamHan
         return try camera.toggleTorch()
 	}
 
-    func setZoomLevel(factor: Double) throws {
+    func setZoomLevel(scale: Double) throws {
         guard let camera = camera else { throw ScannerError.notInitialized }
-        try camera.setZoomLevel(factor: factor)
+        try camera.setZoomLevel(scale: scale)
     }
 
     func setFocusPoint(x: Double, y: Double) throws {

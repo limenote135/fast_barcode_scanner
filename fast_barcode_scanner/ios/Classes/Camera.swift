@@ -163,9 +163,9 @@ class Camera: NSObject {
         scanner.stop()
     }
 
-    func setZoomLevel(factor: Double) throws {
+    func setZoomLevel(scale: Double) throws {
         try captureDevice.lockForConfiguration()
-        captureDevice.videoZoomFactor = factor
+        captureDevice.videoZoomFactor = scale
         captureDevice.unlockForConfiguration()
     }
 
