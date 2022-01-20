@@ -46,6 +46,15 @@ public class FastBarcodeScannerPlugin: NSObject, FlutterPlugin, FlutterStreamHan
             case "startDetector": try startDetector()
             case "stopDetector": try stopDetector()
             case "torch": response = try toggleTorch()
+            case "setZoomLevel":
+                let args = call.arguments as? [String: Any]
+                let factor = args!["ratio"] as! Double
+                try setZoomLevel(factor: factor)
+            case "setFocusPoint":
+                let args = call.arguments as? [String: Any]
+                let x = args!["x"] as! Double
+                let y = args!["y"] as! Double
+                try setFocusPoint(x: x, y: y)
             case "config": response = try updateConfiguration(call: call).asDict
             case "scan": try analyzeImage(args: call.arguments, on: result); return
             case "dispose": dispose()
@@ -113,6 +122,16 @@ public class FastBarcodeScannerPlugin: NSObject, FlutterPlugin, FlutterStreamHan
         guard let camera = camera else { throw ScannerError.notInitialized }
         return try camera.toggleTorch()
 	}
+
+    func setZoomLevel(factor: Double) throws {
+        guard let camera = camera else { throw ScannerError.notInitialized }
+        try camera.setZoomLevel(factor: factor)
+    }
+
+    func setFocusPoint(x: Double, y: Double) throws {
+        guard let camera = camera else { throw ScannerError.notInitialized }
+        try camera.setFocusPoint(x: x, y: y)
+    }
 
     func updateConfiguration(call: FlutterMethodCall) throws -> PreviewConfiguration {
         guard let camera = camera else {

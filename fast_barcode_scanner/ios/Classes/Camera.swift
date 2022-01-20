@@ -163,6 +163,19 @@ class Camera: NSObject {
         scanner.stop()
     }
 
+    func setZoomLevel(factor: Double) throws {
+        try captureDevice.lockForConfiguration()
+        captureDevice.videoZoomFactor = factor
+        captureDevice.unlockForConfiguration()
+    }
+
+    func setFocusPoint(x: Double, y: Double) throws {
+        try captureDevice.lockForConfiguration()
+        captureDevice.focusPointOfInterest = CGPoint(x: x, y: y)
+        captureDevice.focusMode = .autoFocus
+        captureDevice.unlockForConfiguration()
+    }
+
     // MARK: KVO and Notifications
     func addObservers() {
         NotificationCenter.default.addObserver(self, selector: #selector(sessionRuntimeError), name: .AVCaptureSessionRuntimeError, object: session)
