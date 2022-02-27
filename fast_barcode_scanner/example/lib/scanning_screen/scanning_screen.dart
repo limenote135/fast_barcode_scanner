@@ -48,6 +48,7 @@ class _ScanningScreenState extends State<ScanningScreen> {
   );
 
   final cam = CameraController();
+  var zoomLevel = 1.0;
 
   void onViewFinderTap(TapDownDetails details, BoxConstraints constraints) {
     final offset = Offset(
@@ -70,6 +71,22 @@ class _ScanningScreenState extends State<ScanningScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              if (zoomLevel == 1.0) {
+                cam.setZoomLevel(1.5);
+                setState(() {
+                  zoomLevel = 1.5;
+                });
+              } else {
+                cam.setZoomLevel(1.0);
+                setState(() {
+                  zoomLevel = 1.0;
+                });
+              }
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.info),
             onPressed: () {
@@ -103,6 +120,7 @@ class _ScanningScreenState extends State<ScanningScreen> {
           BarcodeType.ean13,
           BarcodeType.code128,
           BarcodeType.qr,
+          BarcodeType.codabar,
         ],
         resolution: Resolution.hd720,
         framerate: Framerate.fps30,
@@ -149,7 +167,15 @@ class _ScanningScreenState extends State<ScanningScreen> {
             ),
           if (_scanningOverlayConfig.enabledOverlays
               .contains(ScanningOverlayType.blurPreview))
-            const BlurPreviewOverlay()
+            const BlurPreviewOverlay(),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              return GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTapDown: (details) => onViewFinderTap(details, constraints),
+              );
+            },
+          ),
         ],
         dispose: widget.dispose,
       ),
