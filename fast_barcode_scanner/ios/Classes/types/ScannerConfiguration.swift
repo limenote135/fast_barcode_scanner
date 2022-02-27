@@ -27,8 +27,7 @@ struct ScannerConfiguration {
                 let framerate = Framerate(rawValue: dict["fps"] as? String ?? ""),
                 let detectionMode = DetectionMode(rawValue: dict["mode"] as? String ?? ""),
                 let codes = dict["types"] as? [String],
-                let apiMode = ApiMode(rawValue: dict["apiMode"] as? String ?? ""),
-                let confidence = dict["confidence"] as? Double
+                let apiMode = ApiMode(rawValue: dict["apiMode"] as? String ?? "")
                 else {
             return nil
         }
@@ -38,8 +37,7 @@ struct ScannerConfiguration {
                 resolution: resolution,
                 mode: detectionMode,
                 codes: codes,
-                apiMode: apiMode,
-                confidence: confidence
+                apiMode: apiMode
         )
     }
 
@@ -88,7 +86,7 @@ let avMetadataObjectTypes: [String: AVMetadataObject.ObjectType] =
 
 // Flutter -> Vision
 @available(iOS 11, *)
-let vnBarcodeSymbols: [String: VNBarcodeSymbology] =
+let vnBarcodeSymbols1: [String: VNBarcodeSymbology] =
         [
             "aztec": .aztec,
             "code128": .code128,
@@ -104,6 +102,33 @@ let vnBarcodeSymbols: [String: VNBarcodeSymbology] =
             "interleaved": .i2of5 // Which one?
         ]
 
+// Flutter -> Vision
+@available(iOS 15, *)
+let vnBarcodeSymbols2: [String: VNBarcodeSymbology] =
+        [
+            "aztec": .aztec,
+            "code128": .code128,
+            "code39": .code39, // Which one?
+            "code93": .code93, // Which one?
+            "dataMatrix": .dataMatrix,
+            "ean13": .ean13,
+            "ean8": .ean8,
+            "itf": .itf14,
+            "pdf417": .pdf417,
+            "qr": .qr,
+            "upcE": .upce,
+            "codabar": .codabar,
+            "interleaved": .i2of5 // Which one?
+        ]
+
+@available(iOS 11, *)
+func getVnbarcodeSymbols() -> [String: VNBarcodeSymbology] {
+    if #available(iOS 15, *) {
+        return vnBarcodeSymbols2
+    }
+    return vnBarcodeSymbols1
+}
+
 // AVFoundation -> Flutter
 let flutterMetadataObjectTypes = Dictionary(uniqueKeysWithValues: avMetadataObjectTypes.map {
     ($1, $0)
@@ -111,7 +136,7 @@ let flutterMetadataObjectTypes = Dictionary(uniqueKeysWithValues: avMetadataObje
 
 // Vision -> Flutter
 @available(iOS 11, *)
-let flutterVNSymbols = Dictionary(uniqueKeysWithValues: vnBarcodeSymbols.map {
+let flutterVNSymbols = Dictionary(uniqueKeysWithValues: getVnbarcodeSymbols().map {
     ($1, $0)
 })
 

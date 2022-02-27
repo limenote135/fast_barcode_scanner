@@ -37,7 +37,7 @@ class VisionBarcodeScanner: NSObject, BarcodeScanner, AVCaptureVideoDataOutputSa
             _symbologies = newValue
 
             // This will just ignore all unsupported types
-            visionBarcodesRequests.first!.symbologies = newValue.compactMap({ vnBarcodeSymbols[$0] })
+            visionBarcodesRequests.first!.symbologies = newValue.compactMap({ getVnbarcodeSymbols()[$0] })
 
             // UPC-A is reported as EAN-13
             if newValue.contains("upcA") && !visionBarcodesRequests.first!.symbologies.contains(.EAN13) {
@@ -47,7 +47,7 @@ class VisionBarcodeScanner: NSObject, BarcodeScanner, AVCaptureVideoDataOutputSa
             // Report to the user if any types are not supported
             if visionBarcodesRequests.first!.symbologies.count != newValue.count {
                 let unsupportedTypes = newValue.filter {
-                    vnBarcodeSymbols[$0] == nil
+                    getVnbarcodeSymbols()[$0] == nil
                 }
                 print("WARNING: Unsupported barcode types selected: \(unsupportedTypes)")
             }
